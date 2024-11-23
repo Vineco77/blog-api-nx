@@ -1,6 +1,7 @@
 version: "3.8"
 
 services:
+  # Serviço da aplicação Node.js
   app:
     build: .
     ports:
@@ -10,10 +11,22 @@ services:
       - mongodb
     environment:
       - NODE_ENV=development
+      - PORT=3000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=blog_api
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - MONGODB_URI=mongodb://mongodb:27017/blog_api
+      - JWT_SECRET=seu_jwt_secret_aqui
+      - JWT_EXPIRATION=1h
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
+    networks:
+      - app-network
 
+  # Serviço PostgreSQL
   postgres:
     image: postgres:14
     ports:
@@ -24,14 +37,25 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
 
+  # Serviço MongoDB
   mongodb:
     image: mongo:latest
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+    networks:
+      - app-network
 
+# Definição dos volumes
 volumes:
   postgres_data:
   mongodb_data:
+
+# Definição da rede
+networks:
+  app-network:
+    driver: bridge
