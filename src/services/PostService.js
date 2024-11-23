@@ -1,29 +1,38 @@
 const Post = require("../models/postgresql/Post");
 const Comment = require("../models/postgresql/Comment");
+const AppError = require("../utils/AppError");
 
 class PostService {
   async createPost(postData, userId) {
-    const { title, content } = postData;
+    try {
+      const { title, content } = postData;
 
-    const post = await Post.create({
-      title,
-      content,
-      userId: userId.toString(),
-    });
+      const post = await Post.create({
+        title,
+        content,
+        userId: userId.toString(),
+      });
 
-    return post;
+      return post;
+    } catch (error) {
+      throw new AppError("Erro ao criar post", 500);
+    }
   }
 
   async listPosts() {
-    return Post.findAll({
-      include: [
-        {
-          model: Comment,
-          attributes: ["id", "content", "userId", "createdAt"],
-        },
-      ],
-      order: [["createdAt", "DESC"]],
-    });
+    try {
+      return await Post.findAll({
+        include: [
+          {
+            model: Comment,
+            attributes: ["id", "content", "userId", "createdAt"],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+      });
+    } catch (error) {
+      throw new AppError("Erro ao listar posts", 500);
+    }
   }
 
   async getPostById(postId) {
@@ -37,37 +46,40 @@ class PostService {
     });
 
     if (!post) {
-      throw new Error("Post não encontrado");
+      throw new AppError("Post não encontrado", 404);
     }
 
     return post;
   }
 
   async updatePost(postId, postData, userId) {
-    const { title, content } = postData;
     const post = await this.getPostById(postId);
 
     if (post.userId !== userId.toString()) {
-      throw new Error("Não autorizado");
+      throw new AppError("Não autorizado", 403);
     }
 
-    await post.update({ title, content });
-    return post;
+    try {
+      const { title, content } = postData;
+      await post.update({ title, content });
+      return post;
+    } catch (error) {
+      throw new AppError("Erro ao atualizar post", 500);
+    }
   }
 
   async deletePost(postId, userId) {
     const post = await this.getPostById(postId);
 
     if (post.userId !== userId.toString()) {
-      throw new Error("Não autorizado");
+      throw new AppError("Não autorizado", 403);
     }
 
-    await post.destroy();
-  }
-
-  async verifyPostOwnership(postId, userId) {
-    const post = await this.getPostById(postId);
-    return post.userId === userId.toString();
+    try {
+      await post.destroy();
+    } catch (error) {
+      throw new AppError("Erro ao deletar post", 500);
+    }
   }
 }
 
