@@ -1,69 +1,74 @@
-const Comment = require("../models/postgresql/Comment");
-const Post = require("../models/postgresql/Post");
+const PostService = require("../services/PostService");
 
-class CommentController {
-  // Criar novo comentário
+class PostController {
+  // Criar novo post
   async create(req, res) {
     try {
-      const { content } = req.body;
-      const { postId } = req.params;
-      const userId = req.user._id;
-
-      // Verifica se o post existe
-      const post = await Post.findByPk(postId);
-      if (!post) {
-        return res.status(404).json({ error: "Post não encontrado" });
-      }
-
-      const comment = await Comment.create({
-        content,
-        postId,
-        userId: userId.toString(),
-      });
-
-      res.status(201).json(comment);
+      const post = await PostService.createPost(req.body, req.user._id);
+      res.status(201).json(post);
     } catch (error) {
-      res.status(500).json({ error: "Erro ao criar comentário" });
+      res.status(500).json({ error: error.message });
     }
   }
 
-  // Listar comentários de um post
-  async listByPost(req, res) {
+  // Listar todos os posts
+  async list(req, res) {
     try {
-      const { postId } = req.params;
-
-      const comments = await Comment.findAll({
-        where: { postId },
-        order: [["createdAt", "DESC"]],
-      });
-
-      res.json(comments);
+      const posts = await PostService.listPosts();
+      res.json(posts);
     } catch (error) {
-      res.status(500).json({ error: "Erro ao listar comentários" });
+      res.status(500).json({ error: error.message });
     }
   }
 
-  // Deletar comentário
+  // Buscar post específico
+  async getById(req, res) {
+    try {
+      const post = await PostService.getPostById(req.params.id);
+      res.json(post);
+    } catch (error) {
+      if (error.message === "Post não encontrado") {
+        return res.status(404).json({ error: error.message });
+      }
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Atualizar post
+  async update(req, res) {
+    try {
+      const post = await PostService.updatePost(
+        req.params.id,
+        req.body,
+        req.user._id
+      );
+      res.json(post);
+    } catch (error) {
+      if (error.message === "Post não encontrado") {
+        return res.status(404).json({ error: error.message });
+      }
+      if (error.message === "Não autorizado") {
+        return res.status(403).json({ error: error.message });
+      }
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Deletar post
   async delete(req, res) {
     try {
-      const { id } = req.params;
-      const comment = await Comment.findByPk(id);
-
-      if (!comment) {
-        return res.status(404).json({ error: "Comentário não encontrado" });
-      }
-
-      // Verifica se o usuário é o dono do comentário
-      if (comment.userId !== req.user._id.toString()) {
-        return res.status(403).json({ error: "Não autorizado" });
-      }
-
-      await comment.destroy();
+      await PostService.deletePost(req.params.id, req.user._id);
       res.status(204).send();
     } catch (error) {
-      res.status(500).json({ error: "Erro ao deletar comentário" });
+      if (error.message === "Post não encontrado") {
+        return res.status(404).json({ error: error.message });
+      }
+      if (error.message === "Não autorizado") {
+        return res.status(403).json({ error: error.message });
+      }
+      res.status(500).json({ error: error.message });
     }
   }
 }
 
-module.exports = new CommentController();
+module.exports = new PostController();
