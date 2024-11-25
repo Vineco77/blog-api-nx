@@ -1,7 +1,6 @@
 const PostService = require("../services/PostService");
 
 class PostController {
-  // Criar novo post
   async create(req, res) {
     try {
       const post = await PostService.createPost(req.body, req.user._id);
@@ -11,7 +10,6 @@ class PostController {
     }
   }
 
-  // Listar todos os posts
   async list(req, res) {
     try {
       const posts = await PostService.listPosts();
@@ -21,7 +19,6 @@ class PostController {
     }
   }
 
-  // Buscar post específico
   async getById(req, res) {
     try {
       const post = await PostService.getPostById(req.params.id);
@@ -34,7 +31,6 @@ class PostController {
     }
   }
 
-  // Atualizar post
   async update(req, res) {
     try {
       const post = await PostService.updatePost(
@@ -54,7 +50,6 @@ class PostController {
     }
   }
 
-  // Deletar post
   async delete(req, res) {
     try {
       await PostService.deletePost(req.params.id, req.user._id);

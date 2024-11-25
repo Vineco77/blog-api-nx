@@ -1,13 +1,14 @@
 const Comment = require("../models/postgresql/Comment");
-const PostService = require("./PostService");
+const Post = require("../models/postgresql/Post");
 
 class CommentService {
   async createComment(postId, commentData, userId) {
+    const post = await Post.findByPk(postId);
+    if (!post) {
+      throw new Error("Post não encontrado");
+    }
+
     const { content } = commentData;
-
-    // Verifica se o post existe através do PostService
-    await PostService.getPostById(postId);
-
     const comment = await Comment.create({
       content,
       postId,
@@ -18,8 +19,10 @@ class CommentService {
   }
 
   async listCommentsByPost(postId) {
-    // Verifica se o post existe
-    await PostService.getPostById(postId);
+    const post = await Post.findByPk(postId);
+    if (!post) {
+      throw new Error("Post não encontrado");
+    }
 
     return Comment.findAll({
       where: { postId },
@@ -39,14 +42,6 @@ class CommentService {
     }
 
     await comment.destroy();
-  }
-
-  async verifyCommentOwnership(commentId, userId) {
-    const comment = await Comment.findByPk(commentId);
-    if (!comment) {
-      throw new Error("Comentário não encontrado");
-    }
-    return comment.userId === userId.toString();
   }
 }
 
