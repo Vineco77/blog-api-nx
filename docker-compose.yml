@@ -1,8 +1,7 @@
-version: "3.8"
-
 services:
   # Serviço da aplicação Node.js
   app:
+    env_file: ".env"
     build: .
     ports:
       - "3000:3000"
@@ -12,33 +11,29 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
-      - DB_HOST=postgres
+      - DB_HOST=${POSTGRES_DB}
       - DB_PORT=5432
-      - DB_NAME=blog_api
-      - DB_USER=postgres
-      - DB_PASSWORD=root
+      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
       - MONGODB_URI=mongodb://mongodb:27017/blog_api
       - JWT_SECRET=seu_jwt_secret_aqui
       - JWT_EXPIRATION=1h
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
-    networks:
-      - app-network
 
   # Serviço PostgreSQL
   postgres:
-    image: postgres:14
-    ports:
-      - "5432:5432"
+    env_file: ".env"
+    container_name: ${POSTGRES_DB}
+    image: postgres:17
     environment:
-      POSTGRES_DB: blog_api
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - app-network
+      - postgres_data:/var/lib/postgresql/data/
 
   # Serviço MongoDB
   mongodb:
@@ -47,15 +42,8 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
-    networks:
-      - app-network
 
 # Definição dos volumes
 volumes:
   postgres_data:
   mongodb_data:
-
-# Definição da rede
-networks:
-  app-network:
-    driver: bridge
