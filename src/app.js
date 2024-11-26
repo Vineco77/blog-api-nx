@@ -4,7 +4,6 @@ const dotenv = require("dotenv");
 const mongoose = require("./config/mongodb");
 const sequelize = require("./config/database");
 
-// Carrega as variáveis de ambiente
 dotenv.config();
 
 const app = express();
@@ -24,7 +23,6 @@ const API_PREFIX = process.env.API_PREFIX || "/api/v1";
 app.use(`${API_PREFIX}/auth`, authRoutes);
 app.use(API_PREFIX, postRoutes);
 
-// Rota básica para teste
 app.get("/", (req, res) => {
   res.json({ message: "API Blog - Desafio Técnico" });
 });

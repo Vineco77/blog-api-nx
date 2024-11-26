@@ -5,13 +5,11 @@ class AuthService {
   async register(userData) {
     const { name, username, password } = userData;
 
-    // Verifica se o username já existe
     const existingUser = await User.findOne({ username });
     if (existingUser) {
       throw new Error("Username já está em uso");
     }
 
-    // Cria o novo usuário
     const user = new User({
       name,
       username,
@@ -20,7 +18,6 @@ class AuthService {
 
     await user.save();
 
-    // Gera o token JWT
     const token = this.generateToken(user._id);
 
     return {
@@ -36,19 +33,16 @@ class AuthService {
   async login(credentials) {
     const { username, password } = credentials;
 
-    // Busca o usuário
     const user = await User.findOne({ username });
     if (!user) {
       throw new Error("Credenciais inválidas");
     }
 
-    // Verifica a senha
     const isValidPassword = await user.comparePassword(password);
     if (!isValidPassword) {
       throw new Error("Credenciais inválidas");
     }
 
-    // Gera o token JWT
     const token = this.generateToken(user._id);
 
     return {

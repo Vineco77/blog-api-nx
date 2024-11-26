@@ -7,7 +7,6 @@ const request = supertest(app);
 
 // Configuração do ambiente de teste
 beforeAll(async () => {
-  // Conecta aos bancos de dados de teste
   await mongoose.connect(
     process.env.MONGODB_URI_TEST || "mongodb://localhost:27017/blog_api_test"
   );
@@ -23,7 +22,6 @@ afterEach(async () => {
   await sequelize.sync({ force: true });
 });
 
-// Fecha as conexões após todos os testes
 afterAll(async () => {
   await mongoose.connection.close();
   await sequelize.close();

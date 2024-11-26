@@ -1,7 +1,6 @@
 const CommentService = require("../services/CommentService");
 
 class CommentController {
-  // Criar novo comentário
   async create(req, res) {
     try {
       const comment = await CommentService.createComment(
@@ -18,7 +17,6 @@ class CommentController {
     }
   }
 
-  // Listar comentários de um post
   async listByPost(req, res) {
     try {
       const comments = await CommentService.listCommentsByPost(
@@ -33,7 +31,6 @@ class CommentController {
     }
   }
 
-  // Deletar comentário
   async delete(req, res) {
     try {
       await CommentService.deleteComment(req.params.id, req.user._id);
