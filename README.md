@@ -167,25 +167,6 @@ DELETE /api/v1/comments/:id
 Authorization: Bearer <token>
 ```
 
-## Executando os Testes
-
-```bash
-# Todos os testes
-npm test
-
-# Apenas testes unitários
-npm run test:unit
-
-# Apenas testes de integração
-npm run test:integration
-
-# Testes com cobertura
-npm run test:coverage
-
-# Testes em modo watch
-npm run test:watch
-```
-
 ## Estrutura do Banco de Dados
 
 ### PostgreSQL
